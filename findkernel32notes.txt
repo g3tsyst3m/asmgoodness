@@ -1,0 +1,126 @@
+0:000> dt _TEB
+ntdll!_TEB
+   +0x000 NtTib            : _NT_TIB
+   +0x01c EnvironmentPointer : Ptr32 Void
+   +0x020 ClientId         : _CLIENT_ID
+   +0x028 ActiveRpcHandle  : Ptr32 Void
+   +0x02c ThreadLocalStoragePointer : Ptr32 Void
+   +0x030 ProcessEnvironmentBlock : Ptr32 _PEB <--
+
+:000> dt _PEB
+ntdll!_PEB
+   +0x000 InheritedAddressSpace : UChar
+   +0x001 ReadImageFileExecOptions : UChar
+   +0x002 BeingDebugged    : UChar
+   +0x003 BitField         : UChar
+   +0x003 ImageUsesLargePages : Pos 0, 1 Bit
+   +0x003 IsProtectedProcess : Pos 1, 1 Bit
+   +0x003 IsImageDynamicallyRelocated : Pos 2, 1 Bit
+   +0x003 SkipPatchingUser32Forwarders : Pos 3, 1 Bit
+   +0x003 IsPackagedProcess : Pos 4, 1 Bit
+   +0x003 IsAppContainer   : Pos 5, 1 Bit
+   +0x003 IsProtectedProcessLight : Pos 6, 1 Bit
+   +0x003 IsLongPathAwareProcess : Pos 7, 1 Bit
+   +0x004 Mutant           : Ptr32 Void
+   +0x008 ImageBaseAddress : Ptr32 Void
+   +0x00c Ldr              : Ptr32 _PEB_LDR_DATA <--
+
+0:000> dt _PEB_LDR_DATA
+ntdll!_PEB_LDR_DATA
+   +0x000 Length           : Uint4B
+   +0x004 Initialized      : UChar
+   +0x008 SsHandle         : Ptr32 Void
+   +0x00c InLoadOrderModuleList : _LIST_ENTRY
+   +0x014 InMemoryOrderModuleList : _LIST_ENTRY
+   +0x01c InInitializationOrderModuleList : _LIST_ENTRY
+   +0x024 EntryInProgress  : Ptr32 Void
+   +0x028 ShutdownInProgress : UChar
+   +0x02c ShutdownThreadId : Ptr32 Void
+
+
+
+0:000> !peb
+PEB at 02c38000
+    InheritedAddressSpace:    No
+    ReadImageFileExecOptions: No
+    BeingDebugged:            Yes
+    ImageBaseAddress:         009e0000
+    NtGlobalFlag:             70
+    NtGlobalFlag2:            0
+    Ldr                       77745d80 <--
+
+0:000> dt _PEB_LDR_DATA 77745d80
+ntdll!_PEB_LDR_DATA
+   +0x000 Length           : 0x30
+   +0x004 Initialized      : 0x1 ''
+   +0x008 SsHandle         : (null)
+   +0x00c InLoadOrderModuleList : _LIST_ENTRY [ 0x34d35c8 - 0x34d56f8 ]
+   +0x014 InMemoryOrderModuleList : _LIST_ENTRY [ 0x34d35d0 - 0x34d5700 ]
+   +0x01c InInitializationOrderModuleList : _LIST_ENTRY [ 0x34d34d0 - 0x34d39b8 ]
+
+we want this: +0x01c InInitializationOrderModuleList : _LIST_ENTRY [ 0x2ef35f8 - 0x2ef3ae0 ]
+
+go ahead and click on it, and you'll get this:
+0:000> dx -r1 (*((ntdll!_LIST_ENTRY *)0x77745d9c))
+(*((ntdll!_LIST_ENTRY *)0x77745d9c))                 [Type: _LIST_ENTRY]
+    [+0x000] Flink            : 0x2ef35f8 [Type: _LIST_ENTRY *] <--
+    [+0x004] Blink            : 0x2ef3ae0 [Type: _LIST_ENTRY *] <--
+
+we're interested in the values above
+
+0:000> dd 0x77745d80+1c (Flink pointer), we want the next Blink pointer
+77745d9c  02ef35f8 <-- 02ef3ae0 00000000 00000000
+77745dac  00000000     00000001 00000000 00000000
+77745dbc  00000000     00000000 00000000 00000000
+77745dcc  00000000     00000000 00000000 00000000
+77745ddc  00000000     00000000 00000000 00000000
+77745dec  00000000     00000000 00000000 00000000
+77745dfc  00000000     00000000 00000000 00000000
+77745e0c  00000000     00000000 00000000 00000000
+
+0:000> dd 0x77745d80+1c+4
+77745da0  02ef3ae0 <-- 00000000 00000000 00000000
+77745db0  00000001   00000000 00000000 00000000
+77745dc0  00000000     00000000 00000000 00000000
+77745dd0  00000000     00000000 00000000 00000000
+77745de0  00000000     00000000 00000000 00000000
+77745df0  00000000     00000000 00000000 00000000
+77745e00  00000000     00000000 00000000 00000000
+77745e10  00000000     00000000 00000000 00000000
+
+now get the data pointed to by Blink
+
+dd poi(0x77745d80+1c+4)
+02ef3ae0  77745d9c 02ef3eb0 76510000 7652fc50
+02ef3af0  000f0000 00420040 02ef3bd8 001a0018
+02ef3b00  02ef3c00 000ca2cc 0000ffff 77745c10
+02ef3b10  77745c10 2654a591 00000000 00000000
+02ef3b20  02ef3b90 02ef3b90 02ef3b90 00000000
+02ef3b30  00000000 77621124 02ef4cb8 02ef3f08
+02ef3b40  00000000 02ef623c 00000000 02ef57e4
+02ef3b50  76510000 00000000 c3e69a31 01d98276
+
+0:000> dd poi(0x77745d80+1c+4)+8 (kernel32.dll)!!!!
+02ef3ae8  76510000 <-- 7652fc50 000f0000 00420040
+02ef3af8  02ef3bd8     001a0018 02ef3c00 000ca2cc
+02ef3b08  0000ffff     77745c10 77745c10 2654a591
+02ef3b18  00000000     00000000 02ef3b90 02ef3b90
+02ef3b28  02ef3b90     00000000 00000000 77621124
+02ef3b38  02ef4cb8     02ef3f08 00000000 02ef623c
+02ef3b48  00000000     02ef57e4 76510000 00000000
+02ef3b58  c3e69a31     01d98276 536cd652 00000004
+
+further research:
+
+0:000> dt _LDR_DATA_TABLE_ENTRY poi(0x77745d80+1c)
+ntdll!_LDR_DATA_TABLE_ENTRY
+   +0x000 InLoadOrderLinks : _LIST_ENTRY [ 0x2ef3eb0 - 0x77745d9c ]
+   +0x008 InMemoryOrderLinks : _LIST_ENTRY [ 0x77620000 - 0x0 ]
+   +0x010 InInitializationOrderLinks : _LIST_ENTRY [ 0x1a4000 - 0x3c003a ]
+   +0x018 DllBase          : 0x02ef34c8 Void
+   +0x01c EntryPoint       : 0x00140012 Void
+   +0x020 SizeOfImage      : 0x77628418
+   +0x024 FullDllName      : _UNICODE_STRING "--- memory read error at address 0x0000ffff ---"
+   +0x02c BaseDllName      : _UNICODE_STRING "㘤???"
+   +0x034 FlagGroup        : [4]  "???"
+   +0x034 Flags            : 0xc7ff7cdf

@@ -1,0 +1,31 @@
+
+#include <windows.h>
+#include <stdio.h>
+
+//https://blog.scrt.ch/2020/07/15/engineering-antivirus-evasion-part-ii/
+
+typedef int (*RobbieMessageBoxA)(
+	HWND    hWnd,
+	LPCTSTR lpText,
+	LPCTSTR lpCaption,
+	UINT    uType
+	);
+
+	int main()
+	{
+	
+	HMODULE HUser32 = LoadLibrary(TEXT("User32.dll"));
+	HMODULE Kernel32Addr = GetModuleHandleW(TEXT("kernel32.dll"));
+	printf("KERNEL32 address in memory: 0x%08p\n", Kernel32Addr);
+
+	FARPROC ExitProcessAddr = GetProcAddress(Kernel32Addr, "ExitProcess");
+	printf("ExitProcess address in memory is: 0x%08p\n", ExitProcessAddr);
+
+	FARPROC WinExecAddr = GetProcAddress(Kernel32Addr, "WinExec");
+	printf("WinExec address in memory is: 0x%08p\n", WinExecAddr);
+
+	RobbieMessageBoxA robbiesmsgbox = (RobbieMessageBoxA) GetProcAddress(HUser32, "MessageBoxA");
+	robbiesmsgbox(NULL, (LPCTSTR)"test", (LPCTSTR)"Something", MB_OK);
+
+	
+}
