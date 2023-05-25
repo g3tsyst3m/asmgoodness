@@ -3,7 +3,7 @@ BITS 32
 section .data
 section .bss
 section .text
-  global _start   ; must be declared for linker
+  global main   ; must be declared for linker
 ;gcc download: https://winlibs.com/#download-release
 ;nasm download: https://www.nasm.us/
 ;nasm -f win32 -o example1.o example1.asm
@@ -16,30 +16,32 @@ section .text
 ;i386pep: PE+ for x86-64 — Windows-format 64-bit binaries
 ;i386pe: PE for i386 — Windows-format 32-bit binaries
 
+;https://github.com/ShiftMediaProject/VSNASM
+
 ;mov [ecx, [eax] moves the value pointed to by eax
 ;mov ecx, eax moves the address held by eax
 ;mov [ecx], eax moves the address held by eax into the value pointed to by ecx 
 
-_start:
+main:
 ; form new stack frame
 		push ebp
 		mov ebp, esp
 
 		; allocate local variables and initialize them to 0
-		sub esp, 1ch
+		sub esp, 0x1c
 		xor eax, eax
-		mov [ebp - 04h], eax			; will store number of exported functions
-		mov [ebp - 08h], eax			; will store address of exported functions addresses table
-		mov [ebp - 0ch], eax			; will store address of exported functions name table
-		mov [ebp - 10h], eax			; will store address of exported functions ordinal table
-		mov [ebp - 14h], eax			; will store a null terminated byte string WinExec
-		mov [ebp - 18h], eax			; will store address to WinExec function
-		mov [ebp - 1ch], eax		
+		;mov [ebp - 0x04], eax			; will store number of exported functions
+		;mov [ebp - 0x8], eax			; will store address of exported functions addresses table
+		;mov [ebp - 0xc], eax			; will store address of exported functions name table
+		;mov [ebp - 0x10], eax			; will store address of exported functions ordinal table
+		;mov [ebp - 0x14], eax			; will store a null terminated byte string WinExec
+		;mov [ebp - 0x18], eax			; will store address to WinExec function
+		;mov [ebp - 0x1c], eax		
 		
         prepwinexec:
-		push 00636578h				    ; pushing null,c,e,x
-		push 456e6957h				    ; pushing E,n,i,W
-		mov [ebp - 14h], esp			; store pointer to WinExec
+		push 0x00636578				    ; pushing null,c,e,x
+		push 0x456e6957				    ; pushing E,n,i,W
+		mov [ebp - 0x14], esp			; store pointer to WinExec
 
 
 		xor eax, eax            ;zero out ecx
@@ -64,17 +66,17 @@ _start:
 		add ecx, ebx            ;get address of name pointer table
 		mov [ebp - 0x0c], ecx   ; store address of name pointer table  
 								;get address of functions ordinal table
-		mov ecx, [eax + 24h]			; get RVA of functions ordinal table
+		mov ecx, [eax + 0x24]			; get RVA of functions ordinal table
 		add ecx, ebx					    ; get address of functions ordinal table
-		mov [ebp - 10h], ecx			; store address of functions ordinal table
+		mov [ebp - 0x10], ecx			; store address of functions ordinal table
 		
 		xor eax, eax
 		xor ecx, ecx
 		
 		;loop through exported function name pointer table and find position of WinExec
 		findWinExecPosition:
-			mov esi, [ebp - 14h]		; esi = pointer to WinExec
-			mov edi, [ebp - 0ch]		; edi = pointer to exported function names table
+			mov esi, [ebp - 0x14]		; esi = pointer to WinExec
+			mov edi, [ebp - 0xc]		; edi = pointer to exported function names table
 			cld											; https://en.wikipedia.org/wiki/Direction_flag
 			mov edi, [edi + eax*4]	; get RVA of the next function name in the exported function names table
 			add edi, ebx				    ; get address of the next function name in the exported function names table
@@ -84,8 +86,8 @@ _start:
 				
 			jz WinExecFound
 			inc eax									; increase the counter
-			cmp eax, [ebp - 4h]			; check if we have looped over all the exported function names
+			cmp eax, [ebp - 0x4]			; check if we have looped over all the exported function names
 			jne findWinExecPosition	
 			
 			WinExecFound:
-			
+			xor eax, eax
