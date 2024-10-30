@@ -1,0 +1,32 @@
+     1                                  bits 64
+     2                                      default rel
+     3                                      
+     4                                      MB_OK   equ 0
+     5                                      NULL    equ 0
+     6                                      
+     7                                      extern MessageBoxA
+     8                                      extern ExitProcess
+     9                                      
+    10                                      section .text
+    11                                          ;rsp must be 16 bits aligned
+    12 00000000 4883E4F0                        and     rsp,    0FFFFFFFFFFFFFFF0h
+    13                                          ;parameters enter from left to right. First four ones, if integers,
+    14                                          ;in these registers, the rest in the stack.
+    15 00000004 B900000000                      mov     rcx,    NULL
+    16                                          ;with nasm, all references to memory are betwen []
+    17 00000009 488D15(00000000)                lea     rdx,    [mensaje1]
+    18 00000010 4C8D05(15000000)                lea     r8,     [mensaje2]
+    19 00000017 41B900000000                    mov     r9,     MB_OK
+    20 0000001D 4883EC20                        sub     rsp,    32
+    21 00000021 E8(00000000)                    call    MessageBoxA
+    22                                          ;sub rsp, 32 jet used in previous function call
+    23 00000026 4831C9                          xor     rcx,    rcx
+    24 00000029 E8(00000000)                    call    ExitProcess
+    25                                      
+    26                                      section .data
+    27 00000000 546869732069732074-             mensaje1: db "This is the message.", 0
+    27 00000009 6865206D6573736167-
+    27 00000012 652E00             
+    28 00000015 546869732069732074-             mensaje2: db "This is the title.", 0
+    28 0000001E 6865207469746C652E-
+    28 00000027 00                 
