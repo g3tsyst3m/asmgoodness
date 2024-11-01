@@ -1,4 +1,3 @@
-; Parse PEB and find kernel32
 ;nasm -fwin64 [x64findkernel32.asm]
 ;ld -m i386pep -o x64findkernel32.exe x64findkernel32.obj
 
@@ -54,9 +53,6 @@ push rcx
 jmp OrdinalLookupSetup
 
 FunctionNameNotFound:
-nop
-nop
-int3
 int3
 
 OrdinalLookupSetup:  ;We found our target WinApi position in the functions lookup
