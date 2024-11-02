@@ -102,18 +102,34 @@ getprocaddress:
 ; Prepare arguments for GetProcAddress:
 pop r15                         ;temporary use
 mov r12, r15                    ;save for permanent use
-mov rcx, r8                     ; RCX = handle to user32.dll (first argument)
+mov rdi, r8                     ; make a copy of kernel32 base address for future needs
+mov rcx, r8                     ; RCX = handle to kernel32.dll (first argument)
 ; Load "LoadLibraryA" onto the stack
 mov rax, 0x0041797261           ; aryA, 0 (include null byte)
 push rax
 mov rax, 0x7262694C64616F4C   ; LoadLibr 
 push rax
 mov rdx, rsp	                 ; RDX points to "LoadLibraryA" (second argument)
-sub rsp, 0x30
+sub rsp, 0x30                    ; decimal 48 ( 3 x 16 bytes)
 call r15                         ; Call GetProcAddress
 
 add rsp, 0x30
 mov r15, rax                     ;holds LoadLibraryA!
+
+getexitprocess:
+mov r14, r12                        ;temporary assignment of GetProcess handle
+mov rcx, rdi                     ; RCX = handle to kernel32.dll (first argument)
+; Load "LoadLibraryA" onto the stack
+mov rax, 0x00737365           ; ess, 0 (include null byte)
+push rax
+mov rax, 0x636F725074697845   ; ExitProc 
+push rax
+mov rdx, rsp	                 ; RDX points to "LoadLibraryA" (second argument)
+sub rsp, 0x30
+call r14                         ; Call GetProcAddress
+
+add rsp, 0x30
+mov r14, rax                     ;holds ExitProcess!
 
 loadlibraryloader:
 mov rax, 0x006C6C              ; add "ll" string to RAX
@@ -157,3 +173,7 @@ messageboxfinally:
     sub rsp, 0x30
     call r15                        ; Call MessageBoxA
 	add rsp, 0x30
+	
+exitcleanly:
+mov ecx, 0
+call r14 ;ExitProcess

