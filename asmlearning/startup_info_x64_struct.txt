@@ -1,0 +1,24 @@
+64 byte alignment (w/ padding)
+==============================
+
+
+# 0:009> dt STARTUPINFOA [rsp]
+# combase!STARTUPINFOA
+#    +0x000 cb               : 0x68  8 push rax
+#    +0x008 lpReserved       : (null)8 push rax
+#    +0x010 lpDesktop        : (null)8 push rax
+#    +0x018 lpTitle          : (null)8 push rax
+#    +0x020 dwX              : 0 4 --> push ax = twice (push ax + push ax)
+#    +0x024 dwY              : 0 4 --\ 8 bytes -> push rax
+#    +0x028 dwXSize          : 0 4 --/
+#    +0x02c dwYSize          : 0 4 --\ 8 bytes -> push rax
+#    +0x030 dwXCountChars    : 0 4 --/
+#    +0x034 dwYCountChars    : 0 4 --\ 8 bytes -> push rax
+#    +0x038 dwFillAttribute  : 0 4 --/
+#    +0x03c dwFlags          : 0x100 4 push ax = twice (push ax (2 bytes) + push ax (2 bytes))
+#    +0x040 wShowWindow      : 0 2 --\ 8 bytes -> push rax
+#    +0x042 cbReserved2      : 0 6 --/
+#    +0x048 lpReserved2      : (null) 8 bytes -> push rax
+#    +0x050 hStdInput        : (null) 8 bytes -> push rax
+#    +0x058 hStdOutput       : 0x00000000`000000a4 Void 8 push rax
+#    +0x060 hStdError        : 0x00000000`000000a4 Void 8 push rax
