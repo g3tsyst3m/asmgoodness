@@ -88,19 +88,19 @@ main:
 
     ; Call CreateProcessA
     mov rax, rsp                ; Get current stack pointer
-    sub rax, 0x500
+    sub rax, 0x500              ; Setup space on the stack for holding process info
     push rax                    ; ProcessInfo
-    push rdi                    ; StartupInfo = Pointer to STARTUPINFOA
+    push rdi                    ; StartupInfo -> Pointer to STARTUPINFOA
     xor rax, rax
     push rax                    ; lpCurrentDirectory
     push rax                    ; lpEnvironment
     push rax                   
     inc rax
-    push rax                    ; bInheritHandles      = 1
+    push rax                    ; bInheritHandles -> 1
     xor rax, rax
-    push rax
-    push rax
-    push rax
+    push rax                    ; hStdInput = NULL
+    push rax                    ; hStdOutput = NULL
+    push rax                    ; hStdError = NULL
     push rax                    ; dwCreationFlags
     mov r8, rax                 ; lpThreadAttributes            
     mov r9, rax                 ; lpProcessAttributes           
