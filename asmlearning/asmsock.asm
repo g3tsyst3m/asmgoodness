@@ -15,13 +15,13 @@ main:
     ; Call WSAStartup
 	and rsp, 0xFFFFFFFFFFFFFFF0
     xor rcx, rcx
-    mov cx, 0x198
+    mov cx, 0x198               ; Defines the size of the buffer that will be allocated on the stack to hold the WSADATA structure
     sub rsp, rcx                ; Reserve space for lpWSDATA structure
     lea rdx, [rsp]              ; Assign address of lpWSAData to RDX - 2nd param
     mov cx, 0x202               ; Assign 0x202 to wVersionRequired as 1st parameter
-    sub rsp, 0x28    
+    sub rsp, 0x28               ; stack alignment
     call WSAStartup
-    add rsp, 0x30
+    add rsp, 0x30               ; stack alignment
 	
     ; Create a socket 
     xor rcx, rcx           
